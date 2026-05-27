@@ -54,61 +54,15 @@ const Landing = () => {
 
             </div>
 
-            {/* Live token card */}
+            {/* Founder Image */}
             <div className="lg:col-span-5 animate-fade-up" style={{ animationDelay: '120ms' }}>
-              <div className="relative">
-                <div className="absolute -top-5 -bottom-5 -right-5 left-10 bg-terracotta/15 rounded-sm" />
-                <div className="relative bg-olive text-bone rounded-sm p-7 lg:p-9 shadow-[0_30px_60px_-30px_rgba(26,54,49,0.45)]">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="label-eyebrow text-white/55">Now serving · AIIMS Delhi</p>
-                      <p className="mt-1 font-display text-white/80 text-[13px]">General OPD · Counter 4</p>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-black/25 px-2.5 py-1 rounded-sm">
-                      <span className="w-1.5 h-1.5 bg-[#4ade80] shadow-[0_0_8px_rgba(74,222,128,0.9)] rounded-full animate-pulse" />
-                      <span className="text-[11px] text-white num font-medium">LIVE</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-7 flex items-end gap-4">
-                    <p className="num font-display font-bold text-white text-[96px] lg:text-[120px] leading-[0.85] tracking-tighter whitespace-nowrap">
-                      A-042
-                    </p>
-                    <div className="pb-3">
-                      <p className="label-eyebrow text-white/50">your token</p>
-                      <p className="font-display text-white text-2xl mt-0.5">A-047</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-7 grid grid-cols-3 gap-3 border-t border-white/10 pt-5">
-                    <div>
-                      <p className="label-eyebrow text-white/45">Ahead of you</p>
-                      <p className="num text-white text-2xl font-display mt-1">4</p>
-                    </div>
-                    <div>
-                      <p className="label-eyebrow text-white/45">Est. wait</p>
-                      <p className="num text-white text-2xl font-display mt-1">32m</p>
-                    </div>
-                    <div>
-                      <p className="label-eyebrow text-white/45">Status</p>
-                      <p className="text-terracotta text-base font-bold mt-1.5">Waiting</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-7 flex items-center gap-2 text-white/65 text-[12px]">
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    Updates sent via WhatsApp to +91 98••• ••• 23
-                  </div>
-                </div>
-
-                <div className="absolute -bottom-5 -right-5 bg-white hairline rounded-sm px-4 py-3 flex items-center gap-3 shadow-xl">
-                  <div className="w-9 h-9 rounded-full bg-terracotta/15 grid place-items-center">
-                    <Zap className="w-4 h-4 text-terracotta" />
-                  </div>
-                  <div>
-                    <p className="text-olive font-medium text-[13px]">Saved 47 mins today</p>
-                    <p className="text-olive-ink/55 text-[11px]">vs. walk-in queue</p>
-                  </div>
+              <div className="relative rounded-sm overflow-hidden shadow-2xl bg-white border border-olive/10">
+                <img src="/founder.png" alt="Charan - Founder of DocQueue" className="w-full h-[400px] object-cover" />
+                <div className="p-6">
+                  <p className="font-display text-olive text-[22px] leading-snug tracking-tight">
+                    "Healthcare is about healing, not waiting. We built DocQueue to bring dignity back to the patient experience."
+                  </p>
+                  <p className="text-terracotta text-[14px] font-medium mt-3 uppercase tracking-wider">— Charan, Founder</p>
                 </div>
               </div>
             </div>
