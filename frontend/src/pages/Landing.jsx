@@ -57,12 +57,12 @@ const Landing = () => {
             {/* Founder Image */}
             <div className="lg:col-span-5 animate-fade-up" style={{ animationDelay: '120ms' }}>
               <div className="relative rounded-sm overflow-hidden shadow-2xl bg-white border border-olive/10">
-                <img src="/founder.png" alt="Charan - Founder of DocQueue" className="w-full h-[400px] object-cover" />
+                <img src="/founder.png" alt="PAVAN KUMAR - Founder of DocQueue" className="w-full h-[400px] object-cover" />
                 <div className="p-6">
                   <p className="font-display text-olive text-[22px] leading-snug tracking-tight">
-                    "Healthcare is about healing, not waiting. We built DocQueue to bring dignity back to the patient experience."
+                    "Stop gooning. Start living"
                   </p>
-                  <p className="text-terracotta text-[14px] font-medium mt-3 uppercase tracking-wider">— Charan, Founder</p>
+                  <p className="text-terracotta text-[14px] font-medium mt-3 uppercase tracking-wider">— PAVAN KUMAR, Founder</p>
                 </div>
               </div>
             </div>

@@ -51,6 +51,7 @@ app.get('/api/specialties', async (req, res) => {
 });
 
 // Database Connection
+console.log('DEBUG MONGODB_URI:', process.env.MONGODB_URI ? process.env.MONGODB_URI.substring(0, 40) + '...' : 'undefined');
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/docqueue')
   .then(() => console.log('MongoDB Connected'))
   .catch(err => console.error('MongoDB Connection Error:', err));
