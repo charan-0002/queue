@@ -3,7 +3,12 @@ import axios from "axios";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 export const API = `${BACKEND_URL}/api`;
 
-export const api = axios.create({ baseURL: API });
+export const api = axios.create({ 
+  baseURL: API,
+  headers: {
+    'Bypass-Tunnel-Reminder': 'true' // In case localtunnel is used
+  }
+});
 
 api.interceptors.request.use((config) => {
   const session = localStorage.getItem("docqueue_session");
