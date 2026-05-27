@@ -24,6 +24,7 @@ export const adminQueue = (id) => api.get(`/hospitals/${id}/queue`).then(r => r.
 export const callEntry = (entryId) => api.put(`/hospitals/advance`, { patientId: entryId, newStatus: 'in-consultation' }).then(r => r.data);
 export const completeEntry = (entryId) => api.put(`/hospitals/advance`, { patientId: entryId, newStatus: 'completed' }).then(r => r.data);
 export const skipEntry = (entryId) => api.delete(`/patients/${entryId}/leave`).then(r => r.data);
+export const deleteEntry = (entryId) => api.delete(`/patients/${entryId}`).then(r => r.data);
 export const updateHospitalSettings = (id, payload) => api.put(`/hospitals/${id}/settings`, payload).then(r => r.data);
 export const listCities = () => api.get("/cities").then(r => r.data);
 export const listSpecialties = () => api.get("/specialties").then(r => r.data);

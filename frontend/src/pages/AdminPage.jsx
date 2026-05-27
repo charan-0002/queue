@@ -3,12 +3,12 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { 
   Search, ArrowRight, ShieldCheck, Activity, Users2, BarChart3, 
   CheckCircle2, SkipForward, BellRing, Loader2, RefreshCw,
-  Lock, User, Hospital, Plus, LogOut, Key, Check, MapPin, Eye, EyeOff
+  Lock, User, Hospital, Plus, LogOut, Key, Check, MapPin, Eye, EyeOff, Trash2
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import CongestionBadge from "../components/CongestionBadge";
-import { adminQueue, listHospitals, callEntry, completeEntry, skipEntry, login, registerHospital, updateHospitalSettings } from "../lib/api";
+import { adminQueue, listHospitals, callEntry, completeEntry, skipEntry, deleteEntry, login, registerHospital, updateHospitalSettings } from "../lib/api";
 import { toast } from "sonner";
 import { io } from "socket.io-client";
 
@@ -190,6 +190,7 @@ const AdminPage = () => {
       if (action === "call") { await callEntry(id); toast.success("Patient called"); }
       else if (action === "complete") { await completeEntry(id); toast.success("Marked done"); }
       else if (action === "skip") { await skipEntry(id); toast("Skipped", { className: "bg-bone-muted" }); }
+      else if (action === "delete") { await deleteEntry(id); toast("Deleted", { className: "bg-terracotta/20 text-terracotta border border-terracotta" }); }
       await refresh();
     } catch (e) {
       toast.error("Action failed");
@@ -672,12 +673,21 @@ const AdminPage = () => {
                           {acting === current.id + "complete" ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
                           Done
                         </button>
-                        <button
-                          onClick={() => handleAction(current.id, "skip")}
-                          className="border border-bone/25 text-bone text-[12px] py-1.5 px-3 rounded-sm font-medium hover:bg-bone/10 inline-flex items-center justify-center gap-1.5"
-                        >
-                          <SkipForward className="w-3 h-3" /> Skip
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleAction(current.id, "skip")}
+                            className="border border-bone/25 text-bone text-[12px] py-1.5 px-3 rounded-sm font-medium hover:bg-bone/10 inline-flex items-center justify-center gap-1.5 flex-1"
+                          >
+                            <SkipForward className="w-3 h-3" /> Skip
+                          </button>
+                          <button
+                            onClick={() => handleAction(current.id, "delete")}
+                            className="border border-terracotta/40 text-terracotta hover:bg-terracotta hover:text-white text-[12px] px-2 rounded-sm inline-flex items-center justify-center transition-colors"
+                            title="Delete Patient"
+                          >
+                            {acting === current.id + "delete" ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -710,13 +720,20 @@ const AdminPage = () => {
                                 <p className="text-olive/50 text-[11px] truncate">{q.symptom || '—'}</p>
                               </div>
                               <div className="col-span-2 num text-olive/60 text-[12px]">{minsWait}m</div>
-                              <div className="col-span-3 flex justify-end">
+                              <div className="col-span-3 flex justify-end gap-1.5">
                                 <button
                                   onClick={() => handleAction(q.id, "call")}
                                   disabled={idx !== 0 && !current ? false : idx !== 0}
                                   className="text-terracotta border border-terracotta/25 hover:bg-terracotta hover:text-white text-[11px] px-2.5 py-1 rounded-sm font-medium disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-terracotta transition-all inline-flex items-center gap-1"
                                 >
                                   {acting === q.id + "call" ? <Loader2 className="w-3 h-3 animate-spin" /> : "Call"}
+                                </button>
+                                <button
+                                  onClick={() => handleAction(q.id, "delete")}
+                                  className="text-olive/40 border border-transparent hover:border-terracotta/30 hover:text-terracotta hover:bg-terracotta/5 text-[11px] px-1.5 py-1 rounded-sm transition-all inline-flex items-center"
+                                  title="Delete Patient"
+                                >
+                                  {acting === q.id + "delete" ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
                                 </button>
                               </div>
                             </div>
@@ -745,6 +762,13 @@ const AdminPage = () => {
                 <span className="col-span-2 text-olive/55 num hidden md:block">{q.patient_phone}</span>
                 <span className="col-span-2 text-congestion-low text-right text-[12px] flex items-center justify-end gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Done
+                  <button
+                    onClick={() => handleAction(q.id, "delete")}
+                    className="ml-2 text-olive/30 hover:text-terracotta transition-colors"
+                    title="Delete Record"
+                  >
+                    {acting === q.id + "delete" ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                  </button>
                 </span>
               </div>
             ))}

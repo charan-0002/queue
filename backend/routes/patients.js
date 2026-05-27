@@ -125,4 +125,17 @@ router.delete('/:id/leave', async (req, res) => {
   }
 });
 
+// DELETE /api/patients/:id (Hard Delete)
+router.delete('/:id', async (req, res) => {
+  try {
+    const patient = await Patient.findByIdAndDelete(req.params.id);
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+    
+    req.app.get('io').to(patient.hospital.toString()).emit('queue_update', { message: 'Patient deleted' });
+    res.json({ message: 'Deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
