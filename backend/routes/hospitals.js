@@ -9,17 +9,27 @@ const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_ACCOUN
   ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
   : null;
 
-const sendNotification = async (to, message) => {
+const sendNotification = async (to, message, notifyVia = 'sms') => {
   if (!twilioClient) {
-    console.log(`[Mock Queue SMS] To: ${to} | Message: ${message}`);
+    console.log(`[Mock Queue ${notifyVia.toUpperCase()}] To: ${to} | Message: ${message}`);
     return;
   }
   try {
+    const isWhatsApp = notifyVia === 'whatsapp';
+    const fromNumber = isWhatsApp 
+      ? `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER || '+14155238886'}`
+      : process.env.TWILIO_PHONE_NUMBER;
+      
+    const toNumber = isWhatsApp
+      ? `whatsapp:${to}`
+      : to;
+
     await twilioClient.messages.create({
       body: message,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: to
+      from: fromNumber,
+      to: toNumber
     });
+    console.log(`[Twilio ${notifyVia.toUpperCase()}] Sent successfully to ${to}`);
   } catch (error) {
     console.error('Twilio Error:', error);
   }
@@ -78,14 +88,18 @@ router.put('/advance', authMiddleware, async (req, res) => {
         const expectedWaitTime = newPosition * (nextP.hospital.averageConsultationTime || 15);
         
         if (expectedWaitTime <= 10 && !nextP.notified10Min) {
-          await sendNotification(nextP.phone, `Hello ${nextP.name}, your appointment at ${nextP.hospital.name} is expected in approximately ${expectedWaitTime} minutes. Please head to the waiting area.`);
+          if (nextP.notify_via !== 'none') {
+            await sendNotification(nextP.phone, `Hello ${nextP.name}, your appointment at ${nextP.hospital.name} is expected in approximately ${expectedWaitTime} minutes. Please head to the waiting area.`, nextP.notify_via);
+          }
           nextP.notified10Min = true;
           await nextP.save();
         }
         
         if (newPosition === 1 && expectedWaitTime > 10) {
           if (!nextP.notifiedNext) {
-            await sendNotification(nextP.phone, `Hello ${nextP.name}, you are NEXT in line at ${nextP.hospital.name}. Please proceed to the doctor's cabin.`);
+            if (nextP.notify_via !== 'none') {
+              await sendNotification(nextP.phone, `Hello ${nextP.name}, you are NEXT in line at ${nextP.hospital.name}. Please proceed to the doctor's cabin.`, nextP.notify_via);
+            }
             nextP.notifiedNext = true;
             await nextP.save();
           }

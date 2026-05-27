@@ -10,17 +10,27 @@ const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_ACCOUN
   ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
   : null;
 
-const sendNotification = async (to, message) => {
+const sendNotification = async (to, message, notifyVia = 'sms') => {
   if (!twilioClient) {
-    console.log(`[Mock SMS] To: ${to} | Message: ${message}`);
+    console.log(`[Mock ${notifyVia.toUpperCase()}] To: ${to} | Message: ${message}`);
     return;
   }
   try {
+    const isWhatsApp = notifyVia === 'whatsapp';
+    const fromNumber = isWhatsApp 
+      ? `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER || '+14155238886'}`
+      : process.env.TWILIO_PHONE_NUMBER;
+      
+    const toNumber = isWhatsApp
+      ? `whatsapp:${to}`
+      : to;
+
     await twilioClient.messages.create({
       body: message,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: to
+      from: fromNumber,
+      to: toNumber
     });
+    console.log(`[Twilio ${notifyVia.toUpperCase()}] Sent successfully to ${to}`);
   } catch (error) {
     console.error('Twilio Error:', error);
   }
@@ -72,9 +82,9 @@ router.post('/checkin', async (req, res) => {
     const io = req.app.get('io');
     io.to(hospitalId).emit('queue_update', { message: 'New patient added to queue' });
 
-    // Send SMS
+    // Send SMS / WhatsApp
     if (notify_via !== 'none') {
-      await sendNotification(patient_phone, `Hello ${patient_name}, you're checked in! Token: ${tokenNumber}. Position: ${patientsAhead + 1}. Est. Wait: ${expectedWaitTime} mins.`);
+      await sendNotification(patient_phone, `Hello ${patient_name}, you're checked in! Token: ${tokenNumber}. Position: ${patientsAhead + 1}. Est. Wait: ${expectedWaitTime} mins.`, notify_via);
     }
 
     res.status(201).json({ ...newPatient.toObject(), token: tokenNumber });
