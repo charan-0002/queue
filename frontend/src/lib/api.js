@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://docqueue-api-production.up.railway.app";
 export const API = `${BACKEND_URL}/api`;
 
 export const api = axios.create({ 
