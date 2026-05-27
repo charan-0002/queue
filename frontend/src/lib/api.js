@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://slimy-cycles-battle.loca.lt";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 export const API = `${BACKEND_URL}/api`;
 
 export const api = axios.create({ 
