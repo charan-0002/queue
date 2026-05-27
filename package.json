@@ -1,0 +1,12 @@
+{
+  "name": "docqueue",
+  "version": "1.0.0",
+  "description": "DocQueue - OPD Queue Management System",
+  "scripts": {
+    "start": "node backend/server.js",
+    "postinstall": "cd backend && npm install"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
