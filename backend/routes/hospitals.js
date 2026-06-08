@@ -77,12 +77,11 @@ router.put('/advance', authMiddleware, async (req, res) => {
         await hospital.save();
       }
       
-      // If called, notify the patient it is their turn
       if (newStatus === 'in-consultation' && patient.notify_via !== 'none') {
         const hospital = await Hospital.findById(hospitalId);
         await sendNotification(
           patient.phone, 
-          `Hello ${patient.name}, it's your turn! Please proceed to the doctor's cabin at ${hospital.name} (${patient.department}).`, 
+          `Hello ${patient.name}, your time has arrived for the treatment at ${hospital.name} (${patient.department}). Please proceed to the doctor's cabin.`, 
           patient.notify_via
         );
       }
