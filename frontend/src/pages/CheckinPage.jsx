@@ -60,15 +60,16 @@ const CheckinPage = () => {
       return;
     }
     
-    const phoneRegex = /^[+]?[\d\s\-]{10,13}$/;
+    const phoneRegex = /^\d{10}$/;
     if (!phoneRegex.test(form.patient_phone)) {
-      toast.error("Please enter a valid phone number");
+      toast.error("Please enter a valid 10-digit phone number");
       return;
     }
 
     setSubmitting(true);
     try {
-      const entry = await checkin(hospitalId, form);
+      const finalForm = { ...form, patient_phone: `+91${form.patient_phone}` };
+      const entry = await checkin(hospitalId, finalForm);
       if (!entry?.token) {
         toast.error("Token not received. Please try again.");
         return;
@@ -172,12 +173,13 @@ const CheckinPage = () => {
                 />
               </Field>
               <Field label="Phone number" icon={Phone}>
+                <span className="text-olive/50 text-[15px] font-medium tracking-wide border-r border-olive/10 pr-2 pl-2">+91</span>
                 <input
                   type="tel"
                   value={form.patient_phone}
-                  onChange={(e) => setForm(f => ({ ...f, patient_phone: e.target.value }))}
-                  placeholder="+91 98••• •••••"
-                  className="w-full bg-transparent px-3 py-3 text-[15px] text-olive-ink focus:outline-none num"
+                  onChange={(e) => setForm(f => ({ ...f, patient_phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+                  placeholder="9876543210"
+                  className="w-full bg-transparent px-2 py-3 text-[15px] text-olive-ink focus:outline-none num tracking-wide"
                   data-testid="checkin-phone"
                   required
                 />
