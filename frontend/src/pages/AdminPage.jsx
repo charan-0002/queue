@@ -33,6 +33,7 @@ const AdminPage = () => {
   const [acting, setActing] = useState(null);
   const [editingDeptTime, setEditingDeptTime] = useState(null);
   const [newDeptTime, setNewDeptTime] = useState("");
+  const [expandedDept, setExpandedDept] = useState(null);
 
   // Register state
   const [registering, setRegistering] = useState(false);
@@ -593,9 +594,12 @@ const AdminPage = () => {
               const queueTime = waiting.length * dSettings.averageConsultationTime;
               
               return (
-                <div key={dept} className={`bg-white hairline rounded-sm overflow-hidden flex flex-col h-[500px] ${!dSettings.isAccepting ? 'opacity-80 grayscale-[30%]' : ''}`}>
+                <div key={dept} className={`bg-white hairline rounded-sm overflow-hidden flex flex-col transition-all ${expandedDept === dept ? 'h-[500px]' : 'h-auto'} ${!dSettings.isAccepting ? 'opacity-80 grayscale-[30%]' : ''}`}>
                   {/* Dept Header */}
-                  <div className="bg-bone-muted/40 px-5 py-4 border-b border-olive/5 flex flex-col gap-3">
+                  <div 
+                    className="bg-bone-muted/40 px-5 py-4 border-b border-olive/5 flex flex-col gap-3 cursor-pointer hover:bg-bone-muted/60 transition-colors"
+                    onClick={() => setExpandedDept(expandedDept === dept ? null : dept)}
+                  >
                     <div className="flex items-center justify-between">
                       <h3 className="font-display text-lg text-olive flex items-center gap-2 truncate pr-2">
                         <span className={`w-2 h-2 rounded-full ${waiting.length > 0 || current ? 'bg-terracotta animate-pulse' : 'bg-olive/20'}`}></span>
@@ -610,9 +614,12 @@ const AdminPage = () => {
                         </div>
                       </div>
                     </div>
-                    
+                  </div>
+
+                  {expandedDept === dept && (
+                    <>
                     {/* Dept Controls */}
-                    <div className="flex items-center justify-between mt-2 pt-3 border-t border-olive/10">
+                    <div className="bg-bone-muted/40 px-5 pb-3 flex items-center justify-between border-b border-olive/10">
                       <div className="flex items-center gap-2">
                         <p className="text-[10px] uppercase tracking-wider text-olive/50 font-medium">Avg Time:</p>
                         {editingDeptTime === dept ? (
@@ -742,6 +749,8 @@ const AdminPage = () => {
                       </div>
                     )}
                   </div>
+                  </>
+                  )}
                 </div>
               );
             })}
