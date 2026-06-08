@@ -584,7 +584,7 @@ const AdminPage = () => {
             <p className="text-olive/60">No patients are currently waiting or in consultation.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="flex flex-col gap-3">
             {displayDepartments.map(dept => {
               const deptQueue = queue.filter(q => q.department === dept);
               const current = deptQueue.find(q => q.status === "in-consultation");
