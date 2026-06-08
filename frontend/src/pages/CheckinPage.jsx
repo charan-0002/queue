@@ -207,15 +207,12 @@ const CheckinPage = () => {
                 required
               >
                 <option value="" disabled>Select department</option>
-                {(hospital.departments || [hospital.specialty]).map(dept => (
-                  <option key={dept} value={dept}>{dept}</option>
+                {((hospital.departments && hospital.departments.length > 0) ? hospital.departments : [hospital.specialty])
+                  .filter(dept => hospital.departmentSettings?.[dept]?.isAccepting !== false)
+                  .map(dept => (
+                    <option key={dept} value={dept}>{dept}</option>
                 ))}
               </select>
-              {hospital.departmentSettings?.[form.department]?.isAccepting === false && (
-                <p className="text-red-500 text-sm mt-2 font-medium bg-red-50 p-2 rounded-sm border border-red-100">
-                  ⚠️ The hospital has stopped taking applications on this department.
-                </p>
-              )}
             </div>
 
             <div>
