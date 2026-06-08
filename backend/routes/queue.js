@@ -11,25 +11,34 @@ router.get('/:token', async (req, res) => {
     if (!entry) return res.status(404).json({ error: 'Token not found' });
 
     // Track position for THAT department specifically!
-    const currentQueue = await Patient.find({ 
+    // Track position and calculate ETA based on individual times
+    const allAhead = await Patient.find({ 
       hospital: entry.hospital._id, 
       department: entry.department, 
-      status: 'waiting',
+      status: { $in: ['in-consultation', 'waiting'] },
       checkInTime: { $lte: entry.checkInTime }
     }).sort('checkInTime');
 
-    // Currently serving in THAT department
-    const serving = await Patient.findOne({
-      hospital: entry.hospital._id,
-      department: entry.department,
-      status: { $in: ['in-consultation', 'in_progress', 'called'] }
-    });
+    let eta = 0;
+    let position = 0;
 
-    const position = currentQueue.findIndex(p => p._id.toString() === entry._id.toString()) + 1;
+    for (const p of allAhead) {
+      if (p._id.toString() === entry._id.toString()) {
+        position++;
+        break; // Reached the current patient
+      }
+
+      if (p.status === 'in-consultation') {
+        const elapsedMinutes = p.consultationStartTime ? Math.floor((new Date() - p.consultationStartTime) / 60000) : 0;
+        const remaining = Math.max(0, (p.estimatedConsultationTime || 15) - elapsedMinutes);
+        eta += remaining;
+      } else if (p.status === 'waiting') {
+        position++;
+        eta += (p.estimatedConsultationTime || 15);
+      }
+    }
     
-    const deptSettings = entry.hospital.departmentSettings?.get(entry.department) || { averageConsultationTime: entry.hospital.averageConsultationTime || 15 };
-    const avgWait = deptSettings.averageConsultationTime;
-    const eta = position * avgWait;
+    eta = Math.round(eta);
 
     res.json({
       entry: {
@@ -50,7 +59,7 @@ router.get('/:token', async (req, res) => {
       },
       position: position,
       eta_minutes: eta,
-      current_token: serving ? serving.tokenNumber : null
+      current_token: allAhead.find(p => p.status === 'in-consultation')?.tokenNumber || null
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

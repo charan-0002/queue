@@ -46,34 +46,48 @@ const processQueueNotifications = async (hospitalId, department) => {
   const hospital = await Hospital.findById(hospitalId);
   if (!hospital) return;
 
-  const deptSettings = hospital.departmentSettings?.get(department) || { averageConsultationTime: hospital.averageConsultationTime || 15 };
-  const avgWait = deptSettings.averageConsultationTime;
+  const allPatients = await Patient.find({ 
+    hospital: hospitalId, 
+    department, 
+    status: { $in: ['in-consultation', 'waiting'] } 
+  }).sort('checkInTime');
 
-  const nextPatients = await Patient.find({ hospital: hospitalId, department, status: 'waiting' }).sort('checkInTime');
+  let runningWaitTime = 0;
+  let waitingPosition = 1;
 
-  for (let i = 0; i < nextPatients.length; i++) {
-    const nextP = nextPatients[i];
-    const newPosition = i + 1;
-    const expectedWaitTime = newPosition * avgWait;
+  for (let i = 0; i < allPatients.length; i++) {
+    const p = allPatients[i];
     
-    // Always update their database expected time
-    nextP.expectedWaitTime = expectedWaitTime;
-    nextP.queuePosition = newPosition;
+    if (p.status === 'in-consultation') {
+      const elapsedMinutes = p.consultationStartTime ? Math.floor((new Date() - p.consultationStartTime) / 60000) : 0;
+      const remaining = Math.max(0, (p.estimatedConsultationTime || 15) - elapsedMinutes);
+      runningWaitTime += remaining;
+    } else if (p.status === 'waiting') {
+      const expectedWaitTime = Math.round(runningWaitTime);
+      const newPosition = waitingPosition++;
+      
+      // Update running wait time for the next person
+      runningWaitTime += (p.estimatedConsultationTime || 15);
 
-    // Check custom threshold
-    const threshold = nextP.notifyThresholdMinutes || 15;
-    if (expectedWaitTime <= threshold && !nextP.hasNotifiedThreshold && nextP.notify_via !== 'none') {
-      await sendNotification(nextP.phone, `Hello ${nextP.name}, your estimated wait time is now approximately ${expectedWaitTime} minutes. Please start heading to ${hospital.name} (${department}).`, nextP.notify_via);
-      nextP.hasNotifiedThreshold = true;
-    }
-    
-    // Check NEXT in line
-    if (newPosition === 1 && expectedWaitTime > threshold && !nextP.notifiedNext && nextP.notify_via !== 'none') {
-      await sendNotification(nextP.phone, `Hello ${nextP.name}, you are NEXT in line at ${hospital.name} (${department}). Please proceed to the waiting area outside the doctor's cabin.`, nextP.notify_via);
-      nextP.notifiedNext = true;
-    }
+      // Always update their database expected time
+      p.expectedWaitTime = expectedWaitTime;
+      p.queuePosition = newPosition;
 
-    await nextP.save();
+      // Check custom threshold
+      const threshold = p.notifyThresholdMinutes || 15;
+      if (expectedWaitTime <= threshold && !p.hasNotifiedThreshold && p.notify_via !== 'none') {
+        await sendNotification(p.phone, `Hello ${p.name}, your estimated wait time is now approximately ${expectedWaitTime} minutes. Please start heading to ${hospital.name} (${department}).`, p.notify_via);
+        p.hasNotifiedThreshold = true;
+      }
+      
+      // Check NEXT in line
+      if (newPosition === 1 && expectedWaitTime > threshold && !p.notifiedNext && p.notify_via !== 'none') {
+        await sendNotification(p.phone, `Hello ${p.name}, you are NEXT in line at ${hospital.name} (${department}). Please proceed to the waiting area outside the doctor's cabin.`, p.notify_via);
+        p.notifiedNext = true;
+      }
+
+      await p.save();
+    }
   }
 };
 

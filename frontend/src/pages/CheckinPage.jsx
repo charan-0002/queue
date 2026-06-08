@@ -25,6 +25,7 @@ const CheckinPage = () => {
     department: "",
     notify_via: "whatsapp",
     notifyThresholdMinutes: 15,
+    estimatedConsultationTime: "",
   });
 
   useEffect(() => {
@@ -197,6 +198,19 @@ const CheckinPage = () => {
                 data-testid="checkin-symptom"
               />
             </Field>
+
+            <div>
+              <p className="label-eyebrow text-olive/55 mb-2.5">Estimated Consult Time (mins)</p>
+              <input
+                type="number"
+                min="1"
+                value={form.estimatedConsultationTime}
+                onChange={(e) => setForm(f => ({ ...f, estimatedConsultationTime: e.target.value }))}
+                placeholder="Leave blank for department average"
+                className="w-full bg-bone-muted/60 border border-olive/15 rounded-sm px-4 py-3 text-[15px] text-olive-ink focus:outline-none focus:border-terracotta"
+                data-testid="checkin-estimated-time"
+              />
+            </div>
 
             <div>
               <p className="label-eyebrow text-olive/55 mb-2.5">Department</p>

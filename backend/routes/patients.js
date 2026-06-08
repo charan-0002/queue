@@ -39,7 +39,7 @@ const sendNotification = async (to, message, notifyVia = 'sms') => {
 // POST /api/patients/checkin
 router.post('/checkin', async (req, res) => {
   try {
-    const { patient_name, patient_phone, hospitalId, department, symptom, notify_via, notifyThresholdMinutes } = req.body;
+    const { patient_name, patient_phone, hospitalId, department, symptom, notify_via, notifyThresholdMinutes, estimatedConsultationTime } = req.body;
     
     // Fetch hospital to get average consultation time
     const hospital = await Hospital.findById(hospitalId);
@@ -58,8 +58,32 @@ router.post('/checkin', async (req, res) => {
       return res.status(403).json({ error: 'This department is currently not accepting new patients.' });
     }
 
-    const avgWait = deptSettings.averageConsultationTime;
-    const expectedWaitTime = (patientsAhead + 1) * avgWait;
+    const defaultAvgWait = deptSettings.averageConsultationTime;
+    const finalEstimatedTime = estimatedConsultationTime ? parseInt(estimatedConsultationTime) : defaultAvgWait;
+
+    // Calculate queue position and expected wait time by summing ahead patients
+    const allAheadPatients = await Patient.find({ 
+      hospital: hospitalId, 
+      department, 
+      status: { $in: ['in-consultation', 'waiting'] } 
+    }).sort('checkInTime');
+
+    let runningWaitTime = 0;
+    let patientsAheadCount = 0;
+
+    for (const p of allAheadPatients) {
+      if (p.status === 'in-consultation') {
+        const elapsedMinutes = p.consultationStartTime ? Math.floor((new Date() - p.consultationStartTime) / 60000) : 0;
+        const remaining = Math.max(0, (p.estimatedConsultationTime || 15) - elapsedMinutes);
+        runningWaitTime += remaining;
+      } else if (p.status === 'waiting') {
+        patientsAheadCount++;
+        runningWaitTime += (p.estimatedConsultationTime || 15);
+      }
+    }
+
+    const expectedWaitTime = Math.round(runningWaitTime);
+    const queuePosition = patientsAheadCount + 1;
     
     // Generate simple token
     const tokenNumber = `${department.substring(0, 1).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
@@ -72,7 +96,8 @@ router.post('/checkin', async (req, res) => {
       symptom,
       notify_via: notify_via || 'none',
       notifyThresholdMinutes: notifyThresholdMinutes || 15,
-      queuePosition: patientsAhead + 1,
+      estimatedConsultationTime: finalEstimatedTime,
+      queuePosition,
       tokenNumber,
       expectedWaitTime
     });
@@ -85,7 +110,7 @@ router.post('/checkin', async (req, res) => {
 
     // Send SMS / WhatsApp
     if (notify_via !== 'none') {
-      await sendNotification(patient_phone, `Hello ${patient_name}, you're checked in! Token: ${tokenNumber}. Position: ${patientsAhead + 1}. Est. Wait: ${expectedWaitTime} mins.`, notify_via);
+      await sendNotification(patient_phone, `Hello ${patient_name}, you're checked in! Token: ${tokenNumber}. Position: ${queuePosition}. Est. Wait: ${expectedWaitTime} mins.`, notify_via);
     }
 
     res.status(201).json({ ...newPatient.toObject(), token: tokenNumber });
