@@ -167,7 +167,7 @@ const TrackPage = () => {
                 <p className="num font-display text-bone text-5xl lg:text-6xl mt-2 tracking-tight">{isDone ? 0 : Math.max(0, position - (isYourTurn ? 0 : 1))}</p>
               </div>
               <div className="bg-olive p-6 col-span-2">
-                <p className="label-eyebrow text-bone/45">Estimated wait</p>
+                <p className="label-eyebrow text-bone/45">Total Est. Wait Time</p>
                 <p className="num font-display text-bone text-4xl lg:text-5xl mt-2 tracking-tight">
                   {isYourTurn ? "Now" : isDone ? "—" : `${eta_minutes}m`}
                 </p>

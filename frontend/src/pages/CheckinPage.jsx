@@ -4,7 +4,7 @@ import { ArrowRight, MapPin, Clock, MessageSquare, Phone, User, Stethoscope, Loa
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import CongestionBadge from "../components/CongestionBadge";
-import { getHospital, checkin } from "../lib/api";
+import { adminQueue, checkin } from "../lib/api";
 import { toast } from "sonner";
 import { io } from "socket.io-client";
 
@@ -14,6 +14,7 @@ const CheckinPage = () => {
   const { hospitalId } = useParams();
   const navigate = useNavigate();
   const [hospital, setHospital] = useState(null);
+  const [queue, setQueue] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -30,9 +31,10 @@ const CheckinPage = () => {
     if (!hospitalId) return;
     
     const fetchIt = () => {
-      getHospital(hospitalId).then((h) => {
-        setHospital(h);
-        setForm(f => ({ ...f, department: f.department || h.departments?.[0] || h.specialty || "" }));
+      adminQueue(hospitalId).then((res) => {
+        setHospital(res.hospital);
+        setQueue(res.queue);
+        setForm(f => ({ ...f, department: f.department || res.hospital.departments?.[0] || res.hospital.specialty || "" }));
       })
       .catch(() => setError("Could not load hospital details. Please try again."))
       .finally(() => setLoading(false));
@@ -91,7 +93,12 @@ const CheckinPage = () => {
 
   // Determine dynamic avg wait based on selected department
   const dSettings = hospital.departmentSettings?.[form.department];
-  const displayAvgWait = dSettings?.averageConsultationTime || hospital.stats?.avg_wait_minutes || 15;
+  const displayAvgWait = dSettings?.averageConsultationTime || hospital.averageConsultationTime || 15;
+  const deptQueue = queue.filter(q => q.department === form.department && q.status === "waiting");
+  const deptWaitCount = deptQueue.length;
+  const estimatedTime = deptWaitCount * displayAvgWait;
+  
+  const currentDeptServing = queue.find(q => q.department === form.department && q.status === "in-consultation");
 
   return (
     <div className="min-h-screen bg-bone" data-testid="checkin-page">
@@ -117,15 +124,15 @@ const CheckinPage = () => {
             <div className="mt-5 grid grid-cols-3 gap-3">
               <div>
                 <p className="label-eyebrow text-olive/45">Now serving</p>
-                <p className="num font-display text-olive text-3xl mt-1">{hospital.stats?.current_token || '—'}</p>
+                <p className="num font-display text-olive text-3xl mt-1">{currentDeptServing?.token || '—'}</p>
               </div>
               <div>
                 <p className="label-eyebrow text-olive/45">Waiting</p>
-                <p className="num font-display text-olive text-3xl mt-1">{hospital.stats?.waiting}</p>
+                <p className="num font-display text-olive text-3xl mt-1">{deptWaitCount}</p>
               </div>
               <div>
-                <p className="label-eyebrow text-olive/45">Avg consult</p>
-                <p className="num font-display text-olive text-3xl mt-1">{displayAvgWait}m</p>
+                <p className="label-eyebrow text-olive/45">Est. Wait</p>
+                <p className="num font-display text-olive text-3xl mt-1">{estimatedTime}m</p>
               </div>
             </div>
             <p className="mt-5 text-[13px] text-olive-ink/60">
