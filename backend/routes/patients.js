@@ -39,7 +39,7 @@ const sendNotification = async (to, message, notifyVia = 'sms') => {
 // POST /api/patients/checkin
 router.post('/checkin', async (req, res) => {
   try {
-    const { patient_name, patient_phone, hospitalId, department, symptom, notify_via } = req.body;
+    const { patient_name, patient_phone, hospitalId, department, symptom, notify_via, notifyThresholdMinutes } = req.body;
     
     // Fetch hospital to get average consultation time
     const hospital = await Hospital.findById(hospitalId);
@@ -71,6 +71,7 @@ router.post('/checkin', async (req, res) => {
       department,
       symptom,
       notify_via: notify_via || 'none',
+      notifyThresholdMinutes: notifyThresholdMinutes || 15,
       queuePosition: patientsAhead + 1,
       tokenNumber,
       expectedWaitTime

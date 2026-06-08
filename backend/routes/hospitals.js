@@ -42,6 +42,41 @@ const getCongestion = (waitCount, capacity) => {
   return 'low';
 };
 
+const processQueueNotifications = async (hospitalId, department) => {
+  const hospital = await Hospital.findById(hospitalId);
+  if (!hospital) return;
+
+  const deptSettings = hospital.departmentSettings?.get(department) || { averageConsultationTime: hospital.averageConsultationTime || 15 };
+  const avgWait = deptSettings.averageConsultationTime;
+
+  const nextPatients = await Patient.find({ hospital: hospitalId, department, status: 'waiting' }).sort('checkInTime');
+
+  for (let i = 0; i < nextPatients.length; i++) {
+    const nextP = nextPatients[i];
+    const newPosition = i + 1;
+    const expectedWaitTime = newPosition * avgWait;
+    
+    // Always update their database expected time
+    nextP.expectedWaitTime = expectedWaitTime;
+    nextP.queuePosition = newPosition;
+
+    // Check custom threshold
+    const threshold = nextP.notifyThresholdMinutes || 15;
+    if (expectedWaitTime <= threshold && !nextP.hasNotifiedThreshold && nextP.notify_via !== 'none') {
+      await sendNotification(nextP.phone, `Hello ${nextP.name}, your estimated wait time is now approximately ${expectedWaitTime} minutes. Please start heading to ${hospital.name} (${department}).`, nextP.notify_via);
+      nextP.hasNotifiedThreshold = true;
+    }
+    
+    // Check NEXT in line
+    if (newPosition === 1 && expectedWaitTime > threshold && !nextP.notifiedNext && nextP.notify_via !== 'none') {
+      await sendNotification(nextP.phone, `Hello ${nextP.name}, you are NEXT in line at ${hospital.name} (${department}). Please proceed to the waiting area outside the doctor's cabin.`, nextP.notify_via);
+      nextP.notifiedNext = true;
+    }
+
+    await nextP.save();
+  }
+};
+
 // PUT /api/hospitals/advance (Protected)
 router.put('/advance', authMiddleware, async (req, res) => {
   try {
@@ -88,32 +123,8 @@ router.put('/advance', authMiddleware, async (req, res) => {
 
       req.app.get('io').to(hospitalId.toString()).emit('queue_update', { message: 'Queue advanced' });
 
-      // Notify the next 10 patients in line
-      const nextPatients = await Patient.find({ hospital: hospitalId, status: 'waiting' }).sort('checkInTime').limit(10).populate('hospital');
-      
-      for (let i = 0; i < nextPatients.length; i++) {
-        const nextP = nextPatients[i];
-        const newPosition = i + 1;
-        const expectedWaitTime = newPosition * (nextP.hospital.averageConsultationTime || 15);
-        
-        if (expectedWaitTime <= 10 && !nextP.notified10Min) {
-          if (nextP.notify_via !== 'none') {
-            await sendNotification(nextP.phone, `Hello ${nextP.name}, your appointment at ${nextP.hospital.name} is expected in approximately ${expectedWaitTime} minutes. Please head to the waiting area.`, nextP.notify_via);
-          }
-          nextP.notified10Min = true;
-          await nextP.save();
-        }
-        
-        if (newPosition === 1 && expectedWaitTime > 10) {
-          if (!nextP.notifiedNext) {
-            if (nextP.notify_via !== 'none') {
-              await sendNotification(nextP.phone, `Hello ${nextP.name}, you are NEXT in line at ${nextP.hospital.name}. Please proceed to the doctor's cabin.`, nextP.notify_via);
-            }
-            nextP.notifiedNext = true;
-            await nextP.save();
-          }
-        }
-      }
+      // Recalculate everything and send automated notifications
+      await processQueueNotifications(hospitalId, patient.department);
     }
     
     res.json(patient);
@@ -258,8 +269,13 @@ router.put('/:id/settings', authMiddleware, async (req, res) => {
     }
     
     await h.save();
+
+    // Re-evaluate notifications for the queue if the time changed
+    if (averageConsultationTime !== undefined && department) {
+      await processQueueNotifications(h._id, department);
+    }
     
-    req.app.get('io').to(h._id.toString()).emit('queue_update', { message: 'Settings updated' });
+    req.app.get('io').to(req.params.id).emit('queue_update', { message: 'Settings updated' });
 
     res.json({ message: 'Settings updated', hospital: h });
   } catch (error) {

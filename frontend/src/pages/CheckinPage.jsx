@@ -24,6 +24,7 @@ const CheckinPage = () => {
     symptom: "",
     department: "",
     notify_via: "whatsapp",
+    notifyThresholdMinutes: 15,
   });
 
   useEffect(() => {
@@ -239,6 +240,22 @@ const CheckinPage = () => {
                 ))}
               </div>
             </div>
+
+            {form.notify_via !== 'none' && (
+              <div>
+                <p className="label-eyebrow text-olive/55 mb-2.5">Alert me when my wait drops below</p>
+                <select
+                  value={form.notifyThresholdMinutes}
+                  onChange={(e) => setForm(f => ({ ...f, notifyThresholdMinutes: parseInt(e.target.value) }))}
+                  className="w-full bg-bone-muted/60 border border-olive/15 rounded-sm px-4 py-3 text-[15px] text-olive-ink focus:outline-none focus:border-terracotta appearance-none"
+                >
+                  <option value={15}>15 minutes</option>
+                  <option value={30}>30 minutes</option>
+                  <option value={45}>45 minutes</option>
+                  <option value={60}>60 minutes</option>
+                </select>
+              </div>
+            )}
 
             <div className="border-t border-olive/10 pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <p className="text-[12px] text-olive-ink/55 max-w-sm leading-relaxed">
