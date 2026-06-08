@@ -17,7 +17,7 @@ export default function AdminDashboard() {
 
     const fetchQueue = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/hospitals/${hospitalId}/queue`, {
+        const res = await axios.get(`https://docqueue-api-production.up.railway.app/api/hospitals/${hospitalId}/queue`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setPatients(res.data);
@@ -28,7 +28,7 @@ export default function AdminDashboard() {
 
     fetchQueue();
 
-    const socket = io('http://localhost:5000');
+    const socket = io('https://docqueue-api-production.up.railway.app');
     socket.emit('join_hospital_room', hospitalId);
     
     socket.on('queue_update', () => {
@@ -40,7 +40,7 @@ export default function AdminDashboard() {
 
   const advanceQueue = async (patientId, newStatus) => {
     try {
-      await axios.put('http://localhost:5000/api/queue/advance', 
+      await axios.put('https://docqueue-api-production.up.railway.app/api/queue/advance', 
         { patientId, newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );

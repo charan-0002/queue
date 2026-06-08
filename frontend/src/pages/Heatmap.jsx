@@ -24,7 +24,7 @@ export default function Heatmap() {
   const [filter, setFilter] = useState('all'); // 'all' | 'bangalore' | 'low' | 'medium' | 'high'
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/hospitals')
+    axios.get('https://docqueue-api-production.up.railway.app/api/hospitals')
       .then(res => setHospitals(res.data))
       .catch(() => {
         // Fallback: hardcoded Bangalore hospitals for UI preview

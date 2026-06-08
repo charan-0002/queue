@@ -100,7 +100,7 @@ const AdminPage = () => {
       refresh();
       
       // Connect to Socket.io for real-time updates
-      const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000');
+      const socket = io(import.meta.env.VITE_API_URL || 'https://docqueue-api-production.up.railway.app');
       socket.emit('join_hospital_room', hospitalId);
       
       socket.on('queue_update', () => {

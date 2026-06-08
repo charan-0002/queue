@@ -37,7 +37,7 @@ const TrackPage = () => {
         setError(null);
         
         // Connect to Socket.io for real-time updates
-        socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000');
+        socket = io(import.meta.env.VITE_API_URL || 'https://docqueue-api-production.up.railway.app');
         socket.emit('join_hospital_room', d.hospital.id || d.hospital._id);
         
         socket.on('queue_update', async () => {
