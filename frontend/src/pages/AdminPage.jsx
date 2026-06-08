@@ -100,7 +100,7 @@ const AdminPage = () => {
       refresh();
       
       // Connect to Socket.io for real-time updates
-      const socket = io(import.meta.env.VITE_API_URL || 'https://fresh-islands-hunt.loca.lt');
+      const socket = io(import.meta.env.VITE_API_URL || 'https://queue-24ej.onrender.com');
       socket.emit('join_hospital_room', hospitalId);
       
       socket.on('queue_update', () => {

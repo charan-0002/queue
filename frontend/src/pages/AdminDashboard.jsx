@@ -17,7 +17,7 @@ export default function AdminDashboard() {
 
     const fetchQueue = async () => {
       try {
-        const res = await axios.get(`https://fresh-islands-hunt.loca.lt/api/hospitals/${hospitalId}/queue`, {
+        const res = await axios.get(`https://queue-24ej.onrender.com/api/hospitals/${hospitalId}/queue`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setPatients(res.data);
@@ -28,7 +28,7 @@ export default function AdminDashboard() {
 
     fetchQueue();
 
-    const socket = io('https://fresh-islands-hunt.loca.lt');
+    const socket = io('https://queue-24ej.onrender.com');
     socket.emit('join_hospital_room', hospitalId);
     
     socket.on('queue_update', () => {
@@ -40,7 +40,7 @@ export default function AdminDashboard() {
 
   const advanceQueue = async (patientId, newStatus) => {
     try {
-      await axios.put('https://fresh-islands-hunt.loca.lt/api/queue/advance', 
+      await axios.put('https://queue-24ej.onrender.com/api/queue/advance', 
         { patientId, newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );

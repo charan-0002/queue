@@ -10,7 +10,7 @@ export default function PatientDashboard() {
 
   const fetchStatus = async (id) => {
     try {
-      const res = await axios.get(`https://fresh-islands-hunt.loca.lt/api/patients/${id}/status`);
+      const res = await axios.get(`https://queue-24ej.onrender.com/api/patients/${id}/status`);
       setPatient(res.data);
     } catch (error) {
       console.error(error);
@@ -36,7 +36,7 @@ export default function PatientDashboard() {
 
   useEffect(() => {
     if (patient && patient.hospital) {
-      const socket = io('https://fresh-islands-hunt.loca.lt');
+      const socket = io('https://queue-24ej.onrender.com');
       socket.emit('join_hospital_room', patient.hospital._id);
       
       socket.on('queue_update', () => {
@@ -50,7 +50,7 @@ export default function PatientDashboard() {
   const handleLeave = async () => {
     if (!window.confirm('Are you sure you want to leave the queue?')) return;
     try {
-      await axios.delete(`https://fresh-islands-hunt.loca.lt/api/patients/${patient._id}/leave`);
+      await axios.delete(`https://queue-24ej.onrender.com/api/patients/${patient._id}/leave`);
       localStorage.removeItem('patientId');
       setPatient(null);
     } catch (error) {
