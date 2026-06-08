@@ -198,12 +198,15 @@ const CheckinPage = () => {
                 required
               >
                 <option value="" disabled>Select department</option>
-                {(hospital.departments || [hospital.specialty]).map(dept => {
-                  const dSettings = hospital.departmentSettings?.[dept] || { isAccepting: true };
-                  if (!dSettings.isAccepting) return null;
-                  return <option key={dept} value={dept}>{dept}</option>;
-                })}
+                {(hospital.departments || [hospital.specialty]).map(dept => (
+                  <option key={dept} value={dept}>{dept}</option>
+                ))}
               </select>
+              {hospital.departmentSettings?.[form.department]?.isAccepting === false && (
+                <p className="text-red-500 text-sm mt-2 font-medium bg-red-50 p-2 rounded-sm border border-red-100">
+                  ⚠️ The hospital has stopped taking applications on this department.
+                </p>
+              )}
             </div>
 
             <div>
@@ -237,7 +240,7 @@ const CheckinPage = () => {
               </p>
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || hospital.departmentSettings?.[form.department]?.isAccepting === false}
                 className="btn-terracotta inline-flex items-center gap-2 disabled:opacity-60"
                 data-testid="checkin-submit"
               >
