@@ -76,6 +76,16 @@ router.put('/advance', authMiddleware, async (req, res) => {
         hospital.averageConsultationTime = Math.max(5, Math.min(45, newAvg));
         await hospital.save();
       }
+      
+      // If called, notify the patient it is their turn
+      if (newStatus === 'in-consultation' && patient.notify_via !== 'none') {
+        const hospital = await Hospital.findById(hospitalId);
+        await sendNotification(
+          patient.phone, 
+          `Hello ${patient.name}, it's your turn! Please proceed to the doctor's cabin at ${hospital.name} (${patient.department}).`, 
+          patient.notify_via
+        );
+      }
 
       req.app.get('io').to(hospitalId.toString()).emit('queue_update', { message: 'Queue advanced' });
 
