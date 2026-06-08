@@ -132,17 +132,9 @@ const HospitalsPage = () => {
                   </div>
                   <CongestionBadge level={h.stats?.congestion} />
                 </div>
-                <div className="mt-4 grid grid-cols-3 gap-2 num text-[12px]">
+                <div className="mt-4 num text-[12px]">
                   <div>
-                    <p className="label-eyebrow text-olive/45 text-[10px]">Waiting</p>
-                    <p className="text-olive font-display text-lg mt-0.5">{h.stats?.waiting}</p>
-                  </div>
-                  <div>
-                    <p className="label-eyebrow text-olive/45 text-[10px]">Now</p>
-                    <p className="text-terracotta font-display text-lg mt-0.5">{h.stats?.current_token || '—'}</p>
-                  </div>
-                  <div>
-                    <p className="label-eyebrow text-olive/45 text-[10px]">Avg consult</p>
+                    <p className="label-eyebrow text-olive/45 text-[10px]">Avg consult time</p>
                     <p className="text-olive font-display text-lg mt-0.5">{h.stats?.avg_wait_minutes}m</p>
                   </div>
                 </div>
