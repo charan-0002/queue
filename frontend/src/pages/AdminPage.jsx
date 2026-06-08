@@ -657,7 +657,6 @@ const AdminPage = () => {
                         {dSettings.isAccepting ? 'Pause Apps' : 'Apps Paused'}
                       </button>
                     </div>
-                  </div>
 
                   {/* Now Serving Block */}
                   {current ? (
