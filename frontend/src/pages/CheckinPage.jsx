@@ -142,9 +142,9 @@ const CheckinPage = () => {
           </div>
 
           <div className="mt-6 bg-bone-muted/70 rounded-sm p-5 border border-olive/5">
-            <p className="label-eyebrow text-olive/60">Important Instructions</p>
+            <p className="label-eyebrow text-olive/60">SMS Notifications</p>
             <p className="text-olive-ink/75 text-[13px] mt-2.5 leading-relaxed">
-              Please arrive at the hospital at least <span className="font-medium text-olive">15 minutes</span> before your estimated turn. Your token may be skipped if you are not present when called.
+              We will send you an SMS notification directly to your phone the exact moment it is your turn to see the doctor. Please ensure your phone number is correct!
             </p>
           </div>
         </aside>
