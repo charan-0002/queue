@@ -15,7 +15,7 @@ export default function CheckIn() {
   const departments = selectedHospital?.departments || [];
 
   useEffect(() => {
-    axios.get('https://docqueue-api-production.up.railway.app/api/hospitals')
+    axios.get('https://wild-llamas-juggle.loca.lt/api/hospitals')
       .then(res => setHospitals(res.data))
       .catch(() => setFetchError(true));
   }, []);
@@ -34,7 +34,7 @@ export default function CheckIn() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post('https://docqueue-api-production.up.railway.app/api/patients/checkin', formData);
+      const res = await axios.post('https://wild-llamas-juggle.loca.lt/api/patients/checkin', formData);
       localStorage.setItem('patientId', res.data._id);
       navigate('/patient/status');
     } catch (error) {
