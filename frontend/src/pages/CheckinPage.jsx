@@ -8,7 +8,7 @@ import { adminQueue, checkin } from "../lib/api";
 import { toast } from "sonner";
 import { io } from "socket.io-client";
 
-const SMS_SHORTCODE = import.meta.env.VITE_SMS_SHORTCODE || "9555-12-3000";
+
 
 const CheckinPage = () => {
   const { hospitalId } = useParams();
@@ -141,10 +141,10 @@ const CheckinPage = () => {
             </p>
           </div>
 
-          <div className="mt-6 bg-bone-muted/70 rounded-sm p-5">
-            <p className="label-eyebrow text-olive/55">Prefer SMS?</p>
-            <p className="text-olive-ink/75 text-[14px] mt-2 leading-relaxed">
-              Send <span className="num text-olive font-medium">JOIN {hospital.name.split(' ')[0].toUpperCase()}</span> to <span className="num text-olive font-medium">{SMS_SHORTCODE}</span>. We'll reply with your token.
+          <div className="mt-6 bg-bone-muted/70 rounded-sm p-5 border border-olive/5">
+            <p className="label-eyebrow text-olive/60">Important Instructions</p>
+            <p className="text-olive-ink/75 text-[13px] mt-2.5 leading-relaxed">
+              Please arrive at the hospital at least <span className="font-medium text-olive">15 minutes</span> before your estimated turn. Your token may be skipped if you are not present when called.
             </p>
           </div>
         </aside>
