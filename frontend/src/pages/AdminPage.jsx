@@ -100,7 +100,7 @@ const AdminPage = () => {
       refresh();
       
       // Connect to Socket.io for real-time updates
-      const socket = io(import.meta.env.VITE_API_URL || 'https://wild-llamas-juggle.loca.lt');
+      const socket = io(import.meta.env.VITE_API_URL || 'https://6a15e9ace4f358.lhr.life');
       socket.emit('join_hospital_room', hospitalId);
       
       socket.on('queue_update', () => {

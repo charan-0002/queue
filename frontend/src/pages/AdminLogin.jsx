@@ -10,7 +10,7 @@ export default function AdminLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('https://wild-llamas-juggle.loca.lt/api/auth/login', formData);
+      const res = await axios.post('https://6a15e9ace4f358.lhr.life/api/auth/login', formData);
       localStorage.setItem('adminToken', res.data.token);
       localStorage.setItem('hospitalId', res.data.admin.hospital._id);
       navigate('/admin/dashboard');

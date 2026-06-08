@@ -17,7 +17,7 @@ export default function AdminDashboard() {
 
     const fetchQueue = async () => {
       try {
-        const res = await axios.get(`https://wild-llamas-juggle.loca.lt/api/hospitals/${hospitalId}/queue`, {
+        const res = await axios.get(`https://6a15e9ace4f358.lhr.life/api/hospitals/${hospitalId}/queue`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setPatients(res.data);
@@ -28,7 +28,7 @@ export default function AdminDashboard() {
 
     fetchQueue();
 
-    const socket = io('https://wild-llamas-juggle.loca.lt');
+    const socket = io('https://6a15e9ace4f358.lhr.life');
     socket.emit('join_hospital_room', hospitalId);
     
     socket.on('queue_update', () => {
@@ -40,7 +40,7 @@ export default function AdminDashboard() {
 
   const advanceQueue = async (patientId, newStatus) => {
     try {
-      await axios.put('https://wild-llamas-juggle.loca.lt/api/queue/advance', 
+      await axios.put('https://6a15e9ace4f358.lhr.life/api/queue/advance', 
         { patientId, newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
