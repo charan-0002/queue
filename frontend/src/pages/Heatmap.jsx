@@ -24,7 +24,7 @@ export default function Heatmap() {
   const [filter, setFilter] = useState('all'); // 'all' | 'bangalore' | 'low' | 'medium' | 'high'
 
   useEffect(() => {
-    axios.get('https://6a15e9ace4f358.lhr.life/api/hospitals')
+    axios.get('https://fresh-islands-hunt.loca.lt/api/hospitals')
       .then(res => setHospitals(res.data))
       .catch(() => {
         // Fallback: hardcoded Bangalore hospitals for UI preview

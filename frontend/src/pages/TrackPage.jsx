@@ -37,7 +37,7 @@ const TrackPage = () => {
         setError(null);
         
         // Connect to Socket.io for real-time updates
-        socket = io(import.meta.env.VITE_API_URL || 'https://6a15e9ace4f358.lhr.life');
+        socket = io(import.meta.env.VITE_API_URL || 'https://fresh-islands-hunt.loca.lt');
         socket.emit('join_hospital_room', d.hospital.id || d.hospital._id);
         
         socket.on('queue_update', async () => {

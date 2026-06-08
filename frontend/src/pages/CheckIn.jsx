@@ -15,7 +15,7 @@ export default function CheckIn() {
   const departments = selectedHospital?.departments || [];
 
   useEffect(() => {
-    axios.get('https://6a15e9ace4f358.lhr.life/api/hospitals')
+    axios.get('https://fresh-islands-hunt.loca.lt/api/hospitals')
       .then(res => setHospitals(res.data))
       .catch(() => setFetchError(true));
   }, []);
@@ -34,7 +34,7 @@ export default function CheckIn() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post('https://6a15e9ace4f358.lhr.life/api/patients/checkin', formData);
+      const res = await axios.post('https://fresh-islands-hunt.loca.lt/api/patients/checkin', formData);
       localStorage.setItem('patientId', res.data._id);
       navigate('/patient/status');
     } catch (error) {
