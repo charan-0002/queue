@@ -85,7 +85,7 @@ setInterval(async () => {
     const patients = await Patient.find({ status: 'waiting', timerNotified: false }).populate('hospital');
     
     for (const patient of patients) {
-      if (!patient.targetTime || !patient.notificationThreshold) continue;
+      if (!patient.targetTime || patient.notificationThreshold == null) continue;
       
       const thresholdMs = patient.notificationThreshold * 60000;
       const targetTimeMs = new Date(patient.targetTime).getTime();
@@ -93,9 +93,13 @@ setInterval(async () => {
       // If the current time is at or past the threshold (e.g. 15 mins before targetTime)
       if (now >= (targetTimeMs - thresholdMs)) {
         if (patient.notify_via !== 'none') {
+          const timeText = patient.notificationThreshold === 0 
+            ? "is happening right now" 
+            : `is in approximately ${patient.notificationThreshold} minutes`;
+            
           await sendNotification(
             patient.phone, 
-            `Hello ${patient.name}, your doctor's appointment at ${patient.hospital.name} is in approximately ${patient.notificationThreshold} minutes. Please be ready.`, 
+            `Hello ${patient.name}, your doctor's appointment at ${patient.hospital.name} ${timeText}. Please be ready.`, 
             patient.notify_via
           );
         }
