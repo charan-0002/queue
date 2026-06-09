@@ -11,34 +11,25 @@ router.get('/:token', async (req, res) => {
     if (!entry) return res.status(404).json({ error: 'Token not found' });
 
     // Track position for THAT department specifically!
-    // Track position and calculate ETA based on individual times
-    const allAhead = await Patient.find({ 
+    const currentQueue = await Patient.find({ 
       hospital: entry.hospital._id, 
       department: entry.department, 
-      status: { $in: ['in-consultation', 'waiting'] },
+      status: 'waiting',
       checkInTime: { $lte: entry.checkInTime }
     }).sort('checkInTime');
 
-    let eta = 0;
-    let position = 0;
+    // Currently serving in THAT department
+    const serving = await Patient.findOne({
+      hospital: entry.hospital._id,
+      department: entry.department,
+      status: { $in: ['in-consultation', 'in_progress', 'called'] }
+    });
 
-    for (const p of allAhead) {
-      if (p._id.toString() === entry._id.toString()) {
-        position++;
-        break; // Reached the current patient
-      }
-
-      if (p.status === 'in-consultation') {
-        const elapsedMinutes = p.consultationStartTime ? Math.floor((new Date() - p.consultationStartTime) / 60000) : 0;
-        const remaining = Math.max(0, (p.estimatedConsultationTime || 15) - elapsedMinutes);
-        eta += remaining;
-      } else if (p.status === 'waiting') {
-        position++;
-        eta += (p.estimatedConsultationTime || 15);
-      }
-    }
+    const position = currentQueue.findIndex(p => p._id.toString() === entry._id.toString()) + 1;
     
-    eta = Math.round(eta);
+    const deptSettings = entry.hospital.departmentSettings?.get(entry.department) || { averageConsultationTime: entry.hospital.averageConsultationTime || 15 };
+    const avgWait = deptSettings.averageConsultationTime;
+    const eta = position * avgWait;
 
     res.json({
       entry: {
@@ -50,7 +41,8 @@ router.get('/:token', async (req, res) => {
         patient_phone: entry.phone,
         patient_name: entry.name,
         symptom: entry.symptom,
-        created_at: entry.checkInTime
+        created_at: entry.checkInTime,
+        targetTime: entry.targetTime
       },
       hospital: {
         id: entry.hospital._id,
@@ -59,7 +51,7 @@ router.get('/:token', async (req, res) => {
       },
       position: position,
       eta_minutes: eta,
-      current_token: allAhead.find(p => p.status === 'in-consultation')?.tokenNumber || null
+      current_token: serving ? serving.tokenNumber : null
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

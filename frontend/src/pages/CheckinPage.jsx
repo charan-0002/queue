@@ -24,8 +24,7 @@ const CheckinPage = () => {
     symptom: "",
     department: "",
     notify_via: "whatsapp",
-    notifyThresholdMinutes: 15,
-    estimatedConsultationTime: "",
+    notificationThreshold: 15,
   });
 
   useEffect(() => {
@@ -200,19 +199,6 @@ const CheckinPage = () => {
             </Field>
 
             <div>
-              <p className="label-eyebrow text-olive/55 mb-2.5">Estimated Consult Time (mins)</p>
-              <input
-                type="number"
-                min="1"
-                value={form.estimatedConsultationTime}
-                onChange={(e) => setForm(f => ({ ...f, estimatedConsultationTime: e.target.value }))}
-                placeholder="Leave blank for department average"
-                className="w-full bg-bone-muted/60 border border-olive/15 rounded-sm px-4 py-3 text-[15px] text-olive-ink focus:outline-none focus:border-terracotta"
-                data-testid="checkin-estimated-time"
-              />
-            </div>
-
-            <div>
               <p className="label-eyebrow text-olive/55 mb-2.5">Department</p>
               <select
                 value={form.department}
@@ -256,17 +242,18 @@ const CheckinPage = () => {
             </div>
 
             {form.notify_via !== 'none' && (
-              <div>
-                <p className="label-eyebrow text-olive/55 mb-2.5">Alert me when my wait drops below</p>
+              <div className="pt-2">
+                <p className="label-eyebrow text-olive/55 mb-2.5">Notification Alert Time</p>
                 <select
-                  value={form.notifyThresholdMinutes}
-                  onChange={(e) => setForm(f => ({ ...f, notifyThresholdMinutes: parseInt(e.target.value) }))}
-                  className="w-full bg-bone-muted/60 border border-olive/15 rounded-sm px-4 py-3 text-[15px] text-olive-ink focus:outline-none focus:border-terracotta appearance-none"
+                  value={form.notificationThreshold}
+                  onChange={(e) => setForm(f => ({ ...f, notificationThreshold: Number(e.target.value) }))}
+                  className="w-full bg-bone-muted/60 border border-olive/15 rounded-sm px-4 py-3 text-[14px] text-olive-ink focus:outline-none focus:border-terracotta appearance-none"
+                  data-testid="notification-threshold"
                 >
-                  <option value={15}>15 minutes</option>
-                  <option value={30}>30 minutes</option>
-                  <option value={45}>45 minutes</option>
-                  <option value={60}>60 minutes</option>
+                  <option value={15}>Notify me 15 minutes before my turn</option>
+                  <option value={10}>Notify me 10 minutes before my turn</option>
+                  <option value={5}>Notify me 5 minutes before my turn</option>
+                  <option value={0}>Notify me when it's exactly my turn</option>
                 </select>
               </div>
             )}

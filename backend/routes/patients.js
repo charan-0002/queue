@@ -3,43 +3,12 @@ const router = express.Router();
 const Patient = require('../models/Patient');
 const Doctor = require('../models/Doctor');
 const Hospital = require('../models/Hospital');
-const twilio = require('twilio');
-
-// Initialize Twilio (Requires valid env variables to work, mocked for demo if missing)
-const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_ACCOUNT_SID !== 'your_twilio_account_sid'
-  ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
-  : null;
-
-const sendNotification = async (to, message, notifyVia = 'sms') => {
-  if (!twilioClient) {
-    console.log(`[Mock ${notifyVia.toUpperCase()}] To: ${to} | Message: ${message}`);
-    return;
-  }
-  try {
-    const isWhatsApp = notifyVia === 'whatsapp';
-    const fromNumber = isWhatsApp 
-      ? `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER || '+14155238886'}`
-      : process.env.TWILIO_PHONE_NUMBER;
-      
-    const toNumber = isWhatsApp
-      ? `whatsapp:${to}`
-      : to;
-
-    await twilioClient.messages.create({
-      body: message,
-      from: fromNumber,
-      to: toNumber
-    });
-    console.log(`[Twilio ${notifyVia.toUpperCase()}] Sent successfully to ${to}`);
-  } catch (error) {
-    console.error('Twilio Error:', error);
-  }
-};
+const { sendNotification } = require('../utils/twilio');
 
 // POST /api/patients/checkin
 router.post('/checkin', async (req, res) => {
   try {
-    const { patient_name, patient_phone, hospitalId, department, symptom, notify_via, notifyThresholdMinutes, estimatedConsultationTime } = req.body;
+    const { patient_name, patient_phone, hospitalId, department, symptom, notify_via, notificationThreshold } = req.body;
     
     // Fetch hospital to get average consultation time
     const hospital = await Hospital.findById(hospitalId);
@@ -58,32 +27,9 @@ router.post('/checkin', async (req, res) => {
       return res.status(403).json({ error: 'This department is currently not accepting new patients.' });
     }
 
-    const defaultAvgWait = deptSettings.averageConsultationTime;
-    const finalEstimatedTime = estimatedConsultationTime ? parseInt(estimatedConsultationTime) : defaultAvgWait;
-
-    // Calculate queue position and expected wait time by summing ahead patients
-    const allAheadPatients = await Patient.find({ 
-      hospital: hospitalId, 
-      department, 
-      status: { $in: ['in-consultation', 'waiting'] } 
-    }).sort('checkInTime');
-
-    let runningWaitTime = 0;
-    let patientsAheadCount = 0;
-
-    for (const p of allAheadPatients) {
-      if (p.status === 'in-consultation') {
-        const elapsedMinutes = p.consultationStartTime ? Math.floor((new Date() - p.consultationStartTime) / 60000) : 0;
-        const remaining = Math.max(0, (p.estimatedConsultationTime || 15) - elapsedMinutes);
-        runningWaitTime += remaining;
-      } else if (p.status === 'waiting') {
-        patientsAheadCount++;
-        runningWaitTime += (p.estimatedConsultationTime || 15);
-      }
-    }
-
-    const expectedWaitTime = Math.round(runningWaitTime);
-    const queuePosition = patientsAheadCount + 1;
+    const avgWait = deptSettings.averageConsultationTime;
+    const expectedWaitTime = (patientsAhead + 1) * avgWait;
+    const targetTime = new Date(Date.now() + expectedWaitTime * 60000);
     
     // Generate simple token
     const tokenNumber = `${department.substring(0, 1).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
@@ -95,11 +41,11 @@ router.post('/checkin', async (req, res) => {
       department,
       symptom,
       notify_via: notify_via || 'none',
-      notifyThresholdMinutes: notifyThresholdMinutes || 15,
-      estimatedConsultationTime: finalEstimatedTime,
-      queuePosition,
+      queuePosition: patientsAhead + 1,
       tokenNumber,
-      expectedWaitTime
+      expectedWaitTime,
+      targetTime,
+      notificationThreshold: notificationThreshold !== undefined ? Number(notificationThreshold) : 15
     });
 
     await newPatient.save();
@@ -110,7 +56,7 @@ router.post('/checkin', async (req, res) => {
 
     // Send SMS / WhatsApp
     if (notify_via !== 'none') {
-      await sendNotification(patient_phone, `Hello ${patient_name}, you're checked in! Token: ${tokenNumber}. Position: ${queuePosition}. Est. Wait: ${expectedWaitTime} mins.`, notify_via);
+      await sendNotification(patient_phone, `Hello ${patient_name}, you're checked in! Token: ${tokenNumber}. Position: ${patientsAhead + 1}. Est. Wait: ${expectedWaitTime} mins.`, notify_via);
     }
 
     res.status(201).json({ ...newPatient.toObject(), token: tokenNumber });

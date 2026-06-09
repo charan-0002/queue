@@ -73,5 +73,40 @@ io.on('connection', (socket) => {
 // Make io accessible in routes
 app.set('io', io);
 
+// Background Timer Loop for Notifications
+const Patient = require('./models/Patient');
+const Hospital = require('./models/Hospital');
+const { sendNotification } = require('./utils/twilio');
+
+setInterval(async () => {
+  try {
+    const now = Date.now();
+    // Find patients who are waiting and have not been notified for their timer threshold
+    const patients = await Patient.find({ status: 'waiting', timerNotified: false }).populate('hospital');
+    
+    for (const patient of patients) {
+      if (!patient.targetTime || !patient.notificationThreshold) continue;
+      
+      const thresholdMs = patient.notificationThreshold * 60000;
+      const targetTimeMs = new Date(patient.targetTime).getTime();
+      
+      // If the current time is at or past the threshold (e.g. 15 mins before targetTime)
+      if (now >= (targetTimeMs - thresholdMs)) {
+        if (patient.notify_via !== 'none') {
+          await sendNotification(
+            patient.phone, 
+            `Hello ${patient.name}, your doctor's appointment at ${patient.hospital.name} is in approximately ${patient.notificationThreshold} minutes. Please be ready.`, 
+            patient.notify_via
+          );
+        }
+        patient.timerNotified = true;
+        await patient.save();
+      }
+    }
+  } catch (err) {
+    console.error('Timer Loop Error:', err);
+  }
+}, 60000); // Run every 60 seconds
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

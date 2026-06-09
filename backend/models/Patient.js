@@ -13,12 +13,12 @@ const patientSchema = new mongoose.Schema({
   consultationEndTime: { type: Date },
   symptom: { type: String },
   notify_via: { type: String, default: 'none' },
-  estimatedConsultationTime: { type: Number, default: 15 },
   expectedWaitTime: { type: Number, default: 0 }, // in minutes
-  notified10Min: { type: Boolean, default: false }, // Legacy, keeping for backwards compatibility for existing patients
-  notifiedNext: { type: Boolean, default: false },
-  notifyThresholdMinutes: { type: Number, default: 15 },
-  hasNotifiedThreshold: { type: Boolean, default: false }
+  targetTime: { type: Date }, // Exact timestamp when their timer hits 0
+  notificationThreshold: { type: Number, default: 15 }, // Notify X minutes before targetTime
+  timerNotified: { type: Boolean, default: false },
+  notified10Min: { type: Boolean, default: false },
+  notifiedNext: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Patient', patientSchema);

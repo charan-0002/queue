@@ -5,26 +5,7 @@ const Patient = require('../models/Patient');
 const twilio = require('twilio');
 const MessagingResponse = twilio.twiml.MessagingResponse;
 
-// Setup Twilio (Mocked if missing credentials)
-const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_ACCOUNT_SID !== 'your_twilio_account_sid'
-  ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
-  : null;
-
-const sendNotification = async (to, message) => {
-  if (!twilioClient) {
-    console.log(`[Mock Webhook SMS/WhatsApp] To: ${to} | Message: ${message}`);
-    return;
-  }
-  try {
-    await twilioClient.messages.create({
-      body: message,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: to
-    });
-  } catch (error) {
-    console.error('Twilio Error:', error);
-  }
-};
+const { sendNotification } = require('../utils/twilio');
 
 // POST /api/webhook/twilio
 // Endpoint configured in Twilio to receive inbound messages

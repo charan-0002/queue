@@ -13,6 +13,7 @@ const TrackPage = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [error, setError] = useState(null);
+  const [timeRemaining, setTimeRemaining] = useState(null);
 
   const fetchStatus = async () => {
     if (!token) { setLoading(false); return; }
@@ -63,6 +64,32 @@ const TrackPage = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  useEffect(() => {
+    let interval;
+    if (data && data.entry.targetTime && data.entry.status === 'waiting') {
+      const target = new Date(data.entry.targetTime).getTime();
+      
+      const updateTimer = () => {
+        const now = Date.now();
+        const diff = target - now;
+        if (diff <= 0) {
+          setTimeRemaining("Due now");
+        } else {
+          const minutes = Math.floor(diff / 60000);
+          const seconds = Math.floor((diff % 60000) / 1000);
+          setTimeRemaining(`${minutes}m ${seconds.toString().padStart(2, '0')}s`);
+        }
+      };
+      
+      updateTimer();
+      interval = setInterval(updateTimer, 1000);
+    } else {
+      setTimeRemaining(null);
+    }
+    
+    return () => clearInterval(interval);
+  }, [data]);
 
   if (!token) {
     return (
@@ -167,9 +194,9 @@ const TrackPage = () => {
                 <p className="num font-display text-bone text-5xl lg:text-6xl mt-2 tracking-tight">{isDone ? 0 : Math.max(0, position - (isYourTurn ? 0 : 1))}</p>
               </div>
               <div className="bg-olive p-6 col-span-2">
-                <p className="label-eyebrow text-bone/45">Total Est. Wait Time</p>
+                <p className="label-eyebrow text-bone/45">Timer Remaining</p>
                 <p className="num font-display text-bone text-4xl lg:text-5xl mt-2 tracking-tight">
-                  {isYourTurn ? "Now" : isDone ? "—" : `${eta_minutes}m`}
+                  {isYourTurn ? "Now" : isDone ? "—" : (timeRemaining || `${eta_minutes}m`)}
                 </p>
               </div>
             </div>
