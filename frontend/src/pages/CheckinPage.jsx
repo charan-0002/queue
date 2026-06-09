@@ -256,12 +256,12 @@ const CheckinPage = () => {
                 <input
                   type="number"
                   min="0"
-                  max={(deptWaitCount + 1) * displayAvgWait}
+                  max={estimatedTime}
                   value={form.notificationThreshold}
                   onChange={(e) => setForm(f => ({ ...f, notificationThreshold: Number(e.target.value) }))}
                   className="w-full bg-bone-muted/60 border border-olive/15 rounded-sm px-4 py-3 text-[14px] text-olive-ink focus:outline-none focus:border-terracotta"
                   data-testid="notification-threshold"
-                  placeholder={`Max: ${(deptWaitCount + 1) * displayAvgWait} mins`}
+                  placeholder={`Max: ${estimatedTime} mins`}
                 />
               </div>
             )}

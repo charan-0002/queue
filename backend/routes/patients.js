@@ -28,7 +28,7 @@ router.post('/checkin', async (req, res) => {
     }
 
     const avgWait = deptSettings.averageConsultationTime;
-    const expectedWaitTime = (patientsAhead + 1) * avgWait;
+    const expectedWaitTime = patientsAhead * avgWait;
     const targetTime = new Date(Date.now() + expectedWaitTime * 60000);
     
     // Generate simple token
