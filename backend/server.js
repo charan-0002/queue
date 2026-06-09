@@ -95,10 +95,12 @@ setInterval(async () => {
           const timeText = patient.notificationThreshold === 0 
             ? "is happening right now" 
             : `is in approximately ${patient.notificationThreshold} minutes`;
+          
+          const hospitalName = patient.hospital ? patient.hospital.name : "the hospital";
             
           await sendNotification(
             patient.phone, 
-            `Hello ${patient.name}, your doctor's appointment at ${patient.hospital.name} ${timeText}. Please be ready.`, 
+            `Hello ${patient.name}, your doctor's appointment at ${hospitalName} ${timeText}. Please be ready.`, 
             patient.notify_via
           );
         }

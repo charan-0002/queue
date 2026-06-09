@@ -42,7 +42,8 @@ router.get('/:token', async (req, res) => {
         patient_name: entry.name,
         symptom: entry.symptom,
         created_at: entry.checkInTime,
-        targetTime: entry.targetTime
+        targetTime: entry.targetTime,
+        notificationThreshold: entry.notificationThreshold
       },
       hospital: {
         id: entry.hospital._id,

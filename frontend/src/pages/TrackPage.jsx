@@ -217,7 +217,14 @@ const TrackPage = () => {
             ) : (
               <div className="flex items-center gap-3 text-bone/85">
                 <Clock className="w-5 h-5 text-bone/55" />
-                <p className="text-base">Sit tight. We'll buzz you when 5 tokens remain.</p>
+                <p className="text-base">
+                  {entry.notify_via === 'none' 
+                    ? "Sit tight. Keep an eye on the timer."
+                    : entry.notificationThreshold === 0
+                      ? "Sit tight. We'll buzz you when it's exactly your turn."
+                      : `Sit tight. We'll buzz you when the timer hits ${entry.notificationThreshold} minutes.`
+                  }
+                </p>
               </div>
             )}
             <Link to={`/hospitals`} className="text-bone/60 text-[13px] hover:text-bone">← Change hospital</Link>
