@@ -75,7 +75,6 @@ app.set('io', io);
 
 // Background Timer Loop for Notifications
 const Patient = require('./models/Patient');
-const Hospital = require('./models/Hospital');
 const { sendNotification } = require('./utils/twilio');
 
 setInterval(async () => {
