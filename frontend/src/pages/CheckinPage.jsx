@@ -35,7 +35,11 @@ const CheckinPage = () => {
       adminQueue(hospitalId).then((res) => {
         setHospital(res.hospital);
         setQueue(res.queue);
-        setForm(f => ({ ...f, department: f.department || res.hospital.departments?.[0] || res.hospital.specialty || "" }));
+        setForm(f => {
+          const availableDepts = (res.hospital.departments && res.hospital.departments.length > 0 ? res.hospital.departments : [res.hospital.specialty])
+            .filter(dept => res.hospital.departmentSettings?.[dept]?.isAccepting !== false);
+          return { ...f, department: f.department || availableDepts[0] || "" };
+        });
       })
       .catch(() => setError("Could not load hospital details. Please try again."))
       .finally(() => setLoading(false));
@@ -214,6 +218,11 @@ const CheckinPage = () => {
                     <option key={dept} value={dept}>{dept}</option>
                 ))}
               </select>
+              {hospital.departmentSettings?.[form.department]?.isAccepting === false && (
+                <p className="text-red-500 text-[13px] mt-2 font-medium bg-red-50 p-2.5 rounded-sm border border-red-100">
+                  ⚠️ This department is currently paused by the hospital.
+                </p>
+              )}
             </div>
 
             <div>
