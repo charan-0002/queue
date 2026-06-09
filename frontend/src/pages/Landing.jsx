@@ -60,7 +60,7 @@ const Landing = () => {
                 <img src="/founder.png" alt="PAVAN KUMAR - Founder of DocQueue" className="w-full h-[400px] object-cover" />
                 <div className="p-6">
                   <p className="font-display text-olive text-[22px] leading-snug tracking-tight">
-                    "Stop gooning. Start living"
+                    "Transforming healthcare, one queue at a time."
                   </p>
                   <p className="text-terracotta text-[14px] font-medium mt-3 uppercase tracking-wider">— PAVAN KUMAR, Founder</p>
                 </div>
