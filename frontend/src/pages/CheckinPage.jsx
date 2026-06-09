@@ -243,18 +243,16 @@ const CheckinPage = () => {
 
             {form.notify_via !== 'none' && (
               <div className="pt-2">
-                <p className="label-eyebrow text-olive/55 mb-2.5">Notification Alert Time</p>
-                <select
+                <p className="label-eyebrow text-olive/55 mb-2.5">Notify me before my turn (in minutes)</p>
+                <input
+                  type="number"
+                  min="0"
                   value={form.notificationThreshold}
                   onChange={(e) => setForm(f => ({ ...f, notificationThreshold: Number(e.target.value) }))}
-                  className="w-full bg-bone-muted/60 border border-olive/15 rounded-sm px-4 py-3 text-[14px] text-olive-ink focus:outline-none focus:border-terracotta appearance-none"
+                  className="w-full bg-bone-muted/60 border border-olive/15 rounded-sm px-4 py-3 text-[14px] text-olive-ink focus:outline-none focus:border-terracotta"
                   data-testid="notification-threshold"
-                >
-                  <option value={15}>Notify me 15 minutes before my turn</option>
-                  <option value={10}>Notify me 10 minutes before my turn</option>
-                  <option value={5}>Notify me 5 minutes before my turn</option>
-                  <option value={0}>Notify me when it's exactly my turn</option>
-                </select>
+                  placeholder="e.g. 15"
+                />
               </div>
             )}
 
