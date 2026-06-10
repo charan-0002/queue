@@ -73,6 +73,7 @@ async function seed() {
       congestionLevel: 'low',
       coordinates: { lat: 12.9716, lng: 77.5946 } // dummy coords for Bangalore
     });
+    const hashed = await bcrypt.hash(h.password, 10);
     await Admin.create({ username: h.username, passwordHash: hashed, hospitalAssignment: hospitalDoc._id });
     console.log('Added: ' + h.name);
   }

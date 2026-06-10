@@ -44,12 +44,12 @@ router.post('/twilio', async (req, res) => {
       // Calculate queue position and wait time
       const patientsAhead = await Patient.countDocuments({ hospital: hospital._id, department, status: 'waiting' });
       const avgWait = hospital.averageConsultationTime || 15;
-      const expectedWaitTime = (patientsAhead + 1) * avgWait;
+      const expectedWaitTime = patientsAhead * avgWait;
       
       const tokenNumber = `SMS-${Math.floor(100 + Math.random() * 900)}`;
 
       const newPatient = new Patient({
-        name: 'SMS Patient', // Since we don't have their name, we use a placeholder
+        name: `Patient (${incomingPhone.slice(-4)})`,
         phone: incomingPhone,
         hospital: hospital._id,
         department,

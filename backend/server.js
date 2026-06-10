@@ -77,7 +77,10 @@ app.set('io', io);
 const Patient = require('./models/Patient');
 const { sendNotification } = require('./utils/twilio');
 
+let isProcessingTwilioQueue = false;
 setInterval(async () => {
+  if (isProcessingTwilioQueue) return;
+  isProcessingTwilioQueue = true;
   try {
     const now = Date.now();
     // Find patients who are waiting and have not been notified for their timer threshold
@@ -110,6 +113,8 @@ setInterval(async () => {
     }
   } catch (err) {
     console.error('Timer Loop Error:', err);
+  } finally {
+    isProcessingTwilioQueue = false;
   }
 }, 60000); // Run every 60 seconds
 

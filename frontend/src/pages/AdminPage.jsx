@@ -214,12 +214,14 @@ const AdminPage = () => {
   };
 
   const handleToggleAccepting = async (dept, currentState) => {
+    if (!hospitalId) return;
     try {
       await updateHospitalSettings(hospitalId, { department: dept, isAccepting: !currentState });
       toast.success(`${dept} is now ${!currentState ? 'accepting' : 'not accepting'} applications.`);
-      refresh();
     } catch (err) {
       toast.error("Failed to update department status");
+    } finally {
+      refresh();
     }
   };
 
@@ -764,10 +766,10 @@ const AdminPage = () => {
           <div className="bg-bone-muted/50 hairline rounded-sm divide-y divide-olive/5">
             {recent_done.slice(0, 8).map(q => (
               <div key={q.id} className="grid grid-cols-12 gap-3 px-5 py-2.5 items-center text-[13px]">
-                <span className="col-span-2 num text-olive font-medium">{q.token}</span>
-                <span className="col-span-3 text-olive-ink truncate">{q.patient_name}</span>
+                <span className="col-span-2 num text-olive font-medium">{q.tokenNumber}</span>
+                <span className="col-span-3 text-olive-ink truncate">{q.name}</span>
                 <span className="col-span-3 text-olive/60 truncate">{q.department}</span>
-                <span className="col-span-2 text-olive/55 num hidden md:block">{q.patient_phone}</span>
+                <span className="col-span-2 text-olive/55 num hidden md:block">{q.phone}</span>
                 <span className="col-span-2 text-congestion-low text-right text-[12px] flex items-center justify-end gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Done
                   <button
