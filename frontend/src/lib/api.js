@@ -34,4 +34,4 @@ export const updateHospitalSettings = (id, payload) => api.put(`/hospitals/${id}
 export const listCities = () => api.get("/cities").then(r => r.data);
 export const listSpecialties = () => api.get("/specialties").then(r => r.data);
 export const login = (credentials) => api.post("/auth/login", credentials).then(r => r.data);
-
+export const registerHospital = (hospitalData) => api.post("/hospitals/register", hospitalData).then(r => r.data);

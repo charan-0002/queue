@@ -73,19 +73,18 @@ router.get('/:id/status', async (req, res) => {
     if (!patient) return res.status(404).json({ message: 'Patient not found' });
     
     // Recalculate dynamic position
-    const patientsAhead = await Patient.countDocuments({ 
+    const currentQueue = await Patient.find({ 
       hospital: patient.hospital._id, 
       department: patient.department, 
       status: 'waiting',
-      checkInTime: { $lt: patient.checkInTime }
-    });
+      checkInTime: { $lte: patient.checkInTime }
+    }).sort('checkInTime');
 
-    const position = patientsAhead + 1;
+    const position = currentQueue.findIndex(p => p._id.toString() === patient._id.toString()) + 1;
     patient.queuePosition = position;
     
-    const deptSettings = patient.hospital.departmentSettings?.get(patient.department);
-    const avgWait = deptSettings?.averageConsultationTime || patient.hospital.averageConsultationTime || 15;
-    patient.expectedWaitTime = patientsAhead * avgWait;
+    const avgWait = patient.hospital.averageConsultationTime || 15;
+    patient.expectedWaitTime = position * avgWait;
 
     res.json(patient);
   } catch (error) {

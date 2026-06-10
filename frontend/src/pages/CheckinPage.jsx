@@ -79,8 +79,8 @@ const CheckinPage = () => {
         toast.error("Token not received. Please try again.");
         return;
       }
-      toast.success(`Token ${entry.tokenNumber} assigned`);
-      navigate(`/track/${entry.tokenNumber}`);
+      toast.success(`Token ${entry.token} assigned`);
+      navigate(`/track/${entry.token}`);
     } catch (err) {
       toast.error("Check-in failed. Please try again.");
     } finally { setSubmitting(false); }

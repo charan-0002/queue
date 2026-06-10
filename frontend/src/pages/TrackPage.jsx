@@ -143,8 +143,8 @@ const TrackPage = () => {
   }
 
   const { entry, hospital, position, eta_minutes, current_token } = data;
-  const isYourTurn = entry.status === "in-consultation";
-  const isDone = entry.status === "completed";
+  const isYourTurn = entry.status === "in_progress" || entry.status === "called";
+  const isDone = entry.status === "done";
 
   return (
     <div className="min-h-screen bg-bone" data-testid="track-page">

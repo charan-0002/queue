@@ -37,8 +37,7 @@ router.put('/advance', authMiddleware, async (req, res) => {
       // If completed, update moving average
       if (newStatus === 'completed' && patient.consultationStartTime) {
         // Fix: use the exact Date object we just set instead of the DB return which could drift
-        const start = patient.consultationStartTime || patient.checkInTime;
-        const durationMinutes = (updateFields.consultationEndTime - start) / 1000 / 60;
+        const durationMinutes = (updateFields.consultationEndTime - patient.consultationStartTime) / 1000 / 60;
         const hospital = await Hospital.findById(hospitalId);
         
         const oldAvg = hospital.averageConsultationTime || 15;
@@ -127,7 +126,7 @@ router.get('/', async (req, res) => {
           waiting: waitCount,
           avg_wait_minutes: h.averageConsultationTime || 15,
           congestion: congestionStr,
-          current_token: queue.length > 0 ? queue[0].tokenNumber : null
+          current_token: queue.length > 0 ? queue[0].token : null
         }
       };
     }));
@@ -158,7 +157,7 @@ router.get('/:id', async (req, res) => {
         waiting: waitCount,
         avg_wait_minutes: h.averageConsultationTime || 15,
         congestion: congestionStr,
-        current_token: queue.length > 0 ? queue[0].tokenNumber : null
+        current_token: queue.length > 0 ? queue[0].token : null
       }
     });
   } catch (error) {
