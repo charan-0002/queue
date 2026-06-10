@@ -54,7 +54,13 @@ const AdminPage = () => {
       const d = await adminQueue(hospitalId);
       setData(d);
     } catch (err) {
-      toast.error("Failed to load queue data");
+      if (err.response && err.response.status === 404) {
+        toast.error("Session expired or hospital removed. Logging out...");
+        localStorage.removeItem("docqueue_session");
+        window.location.href = "/admin";
+      } else {
+        toast.error("Failed to load queue data");
+      }
     } finally {
       setLoading(false);
     }
@@ -515,16 +521,10 @@ const AdminPage = () => {
   }
 
   // Detailed Hospital Queue Console
-  if (loading || !data) {
-    return (
-      <div className="min-h-screen bg-bone">
-        <Navbar />
-        <div className="container-wide py-32 text-center text-olive/60">
-          <Loader2 className="w-6 h-6 animate-spin mx-auto" />
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-bone"><Loader2 className="w-6 h-6 animate-spin text-terracotta" /></div>;
+
+  // If user is logged in but data hasn't loaded yet (or failed to load)
+  if (!data) return <div className="min-h-screen flex items-center justify-center bg-bone"><Loader2 className="w-6 h-6 animate-spin text-terracotta" /></div>;
 
   const { hospital, queue, recent_done, stats } = data;
   
