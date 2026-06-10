@@ -4,6 +4,10 @@ const Admin = require('../models/Admin');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET not set');
+  process.exit(1);
+}
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
   try {
@@ -21,6 +25,10 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
+    if (!admin.hospitalAssignment) {
+      return res.status(400).json({ message: 'No hospital assigned to this admin' });
+    }
+
     // Create JWT
     const payload = {
       adminId: admin._id,
@@ -34,7 +42,7 @@ router.post('/login', async (req, res) => {
       username: admin.username,
       role: 'staff',
       hospital_id: admin.hospitalAssignment._id,
-      admin: { username: admin.username, hospital: admin.hospitalAssignment } 
+      hospital_name: admin.hospitalAssignment.name
     });
   } catch (error) {
     console.error(error);
@@ -44,6 +52,9 @@ router.post('/login', async (req, res) => {
 
 // Setup Initial Admin (Utility route for testing)
 router.post('/setup', async (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(403).json({ error: 'Setup endpoint disabled in production' });
+  }
   try {
     const { username, password, hospitalId } = req.body;
     const salt = await bcrypt.genSalt(10);

@@ -2,8 +2,9 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const Hospital = require('./models/Hospital');
+const Admin = require('./models/Admin');
 
-const MONGODB_URI = "mongodb+srv://badamhalwa02_db_user:monish%40123e@cluster0.0i8o84m.mongodb.net/docqueue?appName=Cluster0";
+const MONGODB_URI = process.env.MONGODB_URI;
 
 const privateDepts = [
   "Cardiology", "Cardiac Surgery", "Neurology", "Neurosurgery",
@@ -47,18 +48,32 @@ const hospitals = [
   { name: "Bowring & Lady Curzon Hospital", city: "Bengaluru", username: "bowring", password: "bowring2026", departments: ["General Medicine", "General Surgery", "Orthopaedics", "Gynaecology & Obstetrics", "Paediatrics & Neonatology", "ENT", "Ophthalmology", "Dermatology", "Emergency & Trauma"] },
   { name: "Jayanagar General Hospital", city: "Bengaluru", username: "jayanagar_general", password: "jayanagar_general2026", departments: ["General Medicine", "General Surgery", "Gynaecology & Obstetrics", "Paediatrics & Neonatology", "ENT", "Dental", "Pharmacy", "Emergency & Trauma"] },
   { name: "BBMP Multi-Speciality Hospital", city: "Bengaluru", username: "bbmp", password: "bbmp2026", departments: ["General Medicine", "General Surgery", "Orthopaedics", "Gynaecology & Obstetrics", "Paediatrics & Neonatology", "Ophthalmology", "Dental"] },
-  { name: "Vanivilas Hospital", city: "Bengaluru", username: "vanivilas", password: "vanivilas2026", departments: ["Gynaecology & Obstetrics", "Neonatology", "Paediatrics & Neonatology", "NICU", "PICU", "Fetal Medicine"] },
+  { name: "Vanivilas Hospital", city: "Bengaluru", username: "vanivilas", password: "vanivilas2026", departments: ["Gynaecology & Obstetrics", "Paediatrics & Neonatology", "NICU", "PICU", "Fetal Medicine"] },
 ];
 
 async function seed() {
   await mongoose.connect(MONGODB_URI);
   console.log('Connected to MongoDB Atlas');
   await Hospital.deleteMany({});
-  console.log('Cleared old hospitals');
+  await Admin.deleteMany({});
+  console.log('Cleared old hospitals and admins');
   for (const h of hospitals) {
-    const hashed = await bcrypt.hash(h.password, 10);
-    const depts = h.departments.map(name => ({ name, avgConsultMinutes: 15, isActive: true }));
-    await Hospital.create({ name: h.name, city: h.city, username: h.username, password: hashed, departments: depts, address: h.city, phone: '', congestionLevel: 'low' });
+    const deptSettings = {};
+    h.departments.forEach(name => {
+      deptSettings[name] = { averageConsultationTime: 15, isAccepting: true };
+    });
+    
+    const hospitalDoc = await Hospital.create({ 
+      name: h.name, 
+      city: h.city, 
+      departments: h.departments, 
+      departmentSettings: deptSettings,
+      address: h.city, 
+      phone: '', 
+      congestionLevel: 'low',
+      coordinates: { lat: 12.9716, lng: 77.5946 } // dummy coords for Bangalore
+    });
+    await Admin.create({ username: h.username, passwordHash: hashed, hospitalAssignment: hospitalDoc._id });
     console.log('Added: ' + h.name);
   }
   console.log('All 30 hospitals seeded!');
