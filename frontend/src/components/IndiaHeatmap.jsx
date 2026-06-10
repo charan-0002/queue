@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { Link } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -72,11 +73,6 @@ const IndiaHeatmap = ({ hospitals, selectedId, onSelect }) => {
                 <p className="font-display font-medium text-[15px] text-olive leading-tight">🏥 {h.name}</p>
                 <p className="text-[12px] text-olive/60 mt-0.5">📍 {h.address}</p>
                 
-                <div className="mt-3 p-2 bg-bone-muted/40 rounded-sm border border-olive/10 text-[11px] font-mono text-olive/80">
-                  <div className="flex items-center gap-1.5"><span className="opacity-70">🔑 Login:</span> <strong>{h.loginId}</strong></div>
-                  <div className="flex items-center gap-1.5 mt-0.5"><span className="opacity-70">🔒 Pass:</span> <strong>{h.passkey}</strong></div>
-                </div>
-
                 <div className="mt-3 pt-2 border-t border-olive/10 grid grid-cols-2 gap-2 text-[11px]">
                   <div>
                     <span className="text-olive/50 uppercase tracking-wider block">Waiting</span>
@@ -86,6 +82,15 @@ const IndiaHeatmap = ({ hospitals, selectedId, onSelect }) => {
                     <span className="text-olive/50 uppercase tracking-wider block">Wait Time</span>
                     <span className="font-medium text-terracotta text-[13px]">{h.stats?.avg_wait_minutes || 0}m avg</span>
                   </div>
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-olive/10">
+                  <Link 
+                    to={`/checkin/${h.id}`} 
+                    className="w-full block text-center bg-terracotta hover:bg-terracotta/90 text-white font-medium py-1.5 px-3 rounded-[3px] text-[12px] transition-colors shadow-sm"
+                  >
+                    Join Queue Here
+                  </Link>
                 </div>
               </div>
             </Popup>
