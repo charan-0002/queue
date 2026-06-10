@@ -9,13 +9,13 @@ function MapUpdater({ selectedId, hospitals }) {
   useEffect(() => {
     if (selectedId && hospitals) {
       const selected = hospitals.find(h => h.id === selectedId);
-      if (selected) {
-        map.flyTo([selected.lat, selected.lng], 13, { duration: 1.5 });
+      if (selected.coordinates) {
+        map.flyTo([selected.coordinates.lat, selected.coordinates.lng], 13, { duration: 1.5 });
       }
     } else if (hospitals.length > 0 && !selectedId) {
       // Fit all markers
       const group = L.featureGroup(
-        hospitals.map(h => L.marker([h.lat, h.lng]))
+        hospitals.filter(h => h.coordinates).map(h => L.marker([h.coordinates.lat, h.coordinates.lng]))
       );
       if (group.getLayers().length > 0) {
         map.fitBounds(group.getBounds().pad(0.1));
@@ -61,7 +61,7 @@ const IndiaHeatmap = ({ hospitals, selectedId, onSelect }) => {
         {hospitals.map((h) => (
           <Marker 
             key={h.id} 
-            position={[h.lat, h.lng]}
+            position={[h.coordinates.lat, h.coordinates.lng]}
             icon={hospitalIcon}
             eventHandlers={{
               click: () => onSelect(h)
